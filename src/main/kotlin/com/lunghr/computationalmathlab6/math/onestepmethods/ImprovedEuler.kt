@@ -29,7 +29,6 @@ class ImprovedEuler : DifferentialEquationSolver() {
 
             }
         } while (r > accuracy)
-        println("Improved Euler accuracy: $r")
         responseData = responseData.copy(euler = responseData.euler.copy(x = xList, y = yList, yExact = yEulerExact))
     }
 

@@ -3,7 +3,6 @@ package com.lunghr.computationalmathlab6.math.onestepmethods
 import com.lunghr.computationalmathlab6.dto.Function
 import com.lunghr.computationalmathlab6.dto.RequestData
 import com.lunghr.computationalmathlab6.math.DifferentialEquationSolver
-import kotlin.math.abs
 
 
 class RungeKutta : DifferentialEquationSolver() {
@@ -11,12 +10,11 @@ class RungeKutta : DifferentialEquationSolver() {
         val (hStep, x0, y0, xn, accuracy) = with(requestData) {
             listOf(h!!, x0!!, y0!!, xn!!, accuracy!!).map { it }
         }
+        var yRungeKuttaExact: List<Double>
         val function = requestData.function!!
-
         var h = hStep
         var (xList, yList) = calculateRungeKuttaMethod(x0, xn, y0, h, function)
         var r: Double
-        var yRungeKuttaExact: List<Double>
 
         do {
             yRungeKuttaExact = calculatePrivateSolution(x0, xn, y0, function, h)
@@ -27,10 +25,8 @@ class RungeKutta : DifferentialEquationSolver() {
                 val result = calculateRungeKuttaMethod(x0, xn, y0, h, function)
                 xList = result.first
                 yList = result.second
-
             }
         } while (r > accuracy)
-        println("Runge-Kutta accuracy: $r")
         responseData = responseData.copy(
             rungeKutta = responseData.rungeKutta.copy(
                 x = xList,
@@ -42,34 +38,28 @@ class RungeKutta : DifferentialEquationSolver() {
 
     companion object {
         fun calculateRungeKuttaStep(x: Double, y: Double, h: Double, function: Function): Double {
-            return (y + 1 / 6.0 * (firstK(x, y, h, function) + 2 * secondK(x, y, h, function) + 3 *
-                    thirdK(x, y, h, function) + fourthK(x, y, h, function)))
+            val k1 = h * function.calculate(x, y)
+            val k2 = h * function.calculate(x + h / 2, y + k1 / 2)
+            val k3 = h * function.calculate(x + h / 2, y + k2 / 2)
+            val k4 = h * function.calculate(x + h, y + k3)
+            return y + (k1 + 2 * k2 + 2 * k3 + k4) / 6.0
         }
-
-        private fun firstK(x: Double, y: Double, h: Double, function: Function): Double = h * function.calculate(x, y)
-
-        private fun secondK(x: Double, y: Double, h: Double, function: Function): Double =
-            h * function.calculate(x + h / 2, y + firstK(x, y, h, function) / 2)
-
-        private fun thirdK(x: Double, y: Double, h: Double, function: Function): Double =
-            h * function.calculate(x + h / 2, y + secondK(x, y, h, function) / 2)
-
-        private fun fourthK(x: Double, y: Double, h: Double, function: Function): Double =
-            h * function.calculate(x + h, y + thirdK(x, y, h, function))
     }
 
 
     private fun calculateRungeKuttaMethod(
         x0: Double, xn: Double, y0: Double, h: Double, function: Function
     ): Pair<List<Double>, List<Double>> {
-        val nStep = (abs(xn - x0) / h).toInt() + 1
+        val n = ((xn - x0) / h).toInt()
+        val x = MutableList(n + 1) { 0.0 }
+        val y = MutableList(n + 1) { 0.0 }
 
-        val x = (0 until nStep).map { x0 + it * h }
-        val y = MutableList(nStep) { 0.0 }.apply {
-            this[0] = y0
-            (1 until nStep).forEach { i ->
-                this[i] = calculateRungeKuttaStep(x[i - 1], this[i - 1], h, function)
-            }
+        x[0] = x0
+        y[0] = y0
+
+        for (i in 1..n) {
+            x[i] = x[i - 1] + h
+            y[i] = calculateRungeKuttaStep(x[i - 1], y[i - 1], h, function)
         }
 
         return x to y

@@ -5,26 +5,26 @@ import kotlin.math.exp
 enum class Function {
     FIRST {
         override fun calculate(x: Double, y: Double): Double =
-            y + (x + 1) * y * y
+            -2 * y
 
         override fun solveCauchy(x: Double, y: Double): Double =
-            (-exp(x) / y - exp(x) * x)
+            y/ exp(-2 * x)
 
         override fun calculatePrivateSolution(x: Double, C: Double): Double =
-            -exp(x) / (C + exp(x) * x)
+            C * exp(-2 * x)
 
         override fun generatePrivateSolutionString(C: Double): String {
-            return "-e^x / (${C} + e^x * x)"
+            return "${C} * e^{-2*x}"
         }
     },
     SECOND {
         override fun calculate(x: Double, y: Double): Double = (x + y) / 2
 
-        override fun solveCauchy(x: Double, y: Double): Double = (y - x - 2) / exp(x / 2)
+        override fun solveCauchy(x: Double, y: Double): Double = (y + x + 2) / exp(x / 2)
 
         override fun calculatePrivateSolution(x: Double, C: Double): Double = C * exp(x / 2) - x - 2
         override fun generatePrivateSolutionString(C: Double): String {
-            return "${C} * e^(x / 2) - x - 2"
+            return "${C} * e^{(x / 2)} - x - 2"
         }
     };
 

@@ -42,11 +42,8 @@ abstract class DifferentialEquationSolver {
 
     public class CombinedSolver : DifferentialEquationSolver() {
         override fun solve(requestData: RequestData) {
-            println(1)
             ImprovedEuler().solve(requestData)
-            println(2)
             RungeKutta().solve(requestData)
-            println(3)
             Milne().solve(requestData)
         }
     }
